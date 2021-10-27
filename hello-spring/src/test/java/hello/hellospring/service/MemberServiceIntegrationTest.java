@@ -1,33 +1,28 @@
 package hello.hellospring.service;
 
 import hello.hellospring.domain.Member;
+import hello.hellospring.repository.MemberRepository;
 import hello.hellospring.repository.MemoryMemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-// 단위 테스트 - 단위 테스트가 보통 통합 테스트보다 좋은 테스트일 수 있음
-// 단위 테스트를 잘 만드는 연습을 하자!!
-class MemberServiceTest {
+/**
+ * 메모리가 아닌 실제 디비와 연결된 테스트 - 통합테스트
+ */
 
-    MemberService memberService;
-    MemoryMemberRepository memberRepository;
+@SpringBootTest // 스프링 컨테이너와 테스트를 함께 실행
+@Transactional // 테스트가 끝나면 데이터 롤백 - 디비에 반영 안되도록(데이터 일일이 지우는 작업 없이 다음 테스트를 계속 실행 가능하게끔)
+class MemberServiceIntegrationTest {
 
-    // 같은 MemberRepository 인스턴스로 사용하기 위함. 현재는 static 이기 때문에 괜찮지만..
-    // 테스트 실행하기 전에 수행
-    @BeforeEach
-    public void beforeEach(){
-        memberRepository = new MemoryMemberRepository();
-        memberService = new MemberService(memberRepository);
-    }
-
-    @AfterEach
-    public void afterEach(){
-        memberRepository.clearStore();
-    }
+    @Autowired MemberService memberService; // 테스트 코드에서는 필요한 것을 injection 받고 끝이기 때문에 보통 필드 주입을 사용
+    @Autowired MemberRepository memberRepository;
 
     @Test
     void 회원가입() {
@@ -54,13 +49,6 @@ class MemberServiceTest {
 
         //when
         memberService.join(member1);
-
-//        try{
-//            memberService.join(member2);
-//            fail();
-//        } catch (IllegalStateException e){
-//            assertThat(e.getMessage()).isEqualTo("이미 존재하는 회원입니다.")
-//        }
 
         IllegalStateException e = assertThrows(IllegalStateException.class, () -> memberService.join(member2));
         assertThat(e.getMessage()).isEqualTo("이미 존재하는 회원입니다.");
