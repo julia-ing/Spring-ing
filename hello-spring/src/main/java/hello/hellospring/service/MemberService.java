@@ -32,6 +32,19 @@ public class MemberService {
     //회원가입
     public Long join(Member member) {
         //중복 회원 검증
+        /**
+        long start = System.currentTimeMillis();
+        try {
+            validateDuplicateMember(member);  // 핵심 관심 사항
+            memberRepository.save(member);
+            return member.getId();
+        } finally {
+            long finish = System.currentTimeMillis();  // 공통 관심 사항
+            long timeMs = finish - start;
+            System.out.println("join = " + timeMs + "ms");  // AOP 를 안쓰면 이렇게 모든 메서드에 코드 넣어줘야 함
+            // 시간을 측정하는 로직과 핵심 비즈니스의 로직이 섞여서 유지보수가 어려움 -> AOP 등장
+       }
+       */
         validateDuplicateMember(member);
         memberRepository.save(member);
         return member.getId();
