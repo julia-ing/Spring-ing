@@ -4,6 +4,7 @@ import hello.hellospring.domain.Member;
 import hello.hellospring.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,8 @@ import java.util.Optional;
  * 2. 자바 코드로 직접 스프링 빈 등록하기
  */
 // @Service
+
+@Transactional  // jpa 사용 시 항상 transaction 있어야 함
 public class MemberService {
     private final MemberRepository memberRepository;
 
