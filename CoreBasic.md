@@ -1,6 +1,7 @@
 # Spring Core Basic
 
-🌸 [섹션 1. 객체 지향 설계와 스프링](#섹션-1.-객체-지향-설계와-스프링)
+- 🌸 [섹션 1. 객체 지향 설계와 스프링](#섹션-1.-객체-지향-설계와-스프링)
+- 🧩 [섹션 2. 스프링 핵심 원리 이해1 - 예제 만들기](#섹션-2.-스프링-핵심-원리-이해1---예제-만들기)
 
 ---
 
@@ -91,3 +92,35 @@ Tomcat 같은 **웹 서버**를 내장해서 별도 웹 서버를 설치하지 �
 ```
 
 ---
+
+## 섹션 2. 스프링 핵심 원리 이해1 - 예제 만들기
+## ✨ 요구사항과 설계
+
+<회원 / 주문 도메인 협력 관계> - 기획자들도 볼 수 있는 그림
+
+<img width="593" alt="스크린샷 2022-03-14 오후 5 25 10" src="https://user-images.githubusercontent.com/77239220/158133090-189c0e23-37b7-4046-9085-9728f221898a.png">
+<img width="593" alt="스크린샷 2022-03-14 오후 6 20 30" src="https://user-
+images.githubusercontent.com/77239220/158142385-0edd691f-043f-4146-af48-73b84f9f916e.png">
+
+<회원 / 주문 클래스 다이어그램> - 도메인 협력 관계를 바탕으로 개발자가 설계, 서버를 실행하지 않고 클래스들만 분석
+
+      참고: 인터페이스 구현체가 하나밖에 없으면 관습적으로 뒤에 Impl 을 붙인다.
+
+<img width="593" alt="스크린샷 2022-03-14 오후 5 33 02" src="https://user-images.githubusercontent.com/77239220/158134292-3dc75b22-7cbd-49fb-b14a-06106faef685.png">
+<img width="593" alt="스크린샷 2022-03-14 오후 6 20 39" src="https://user-images.githubusercontent.com/77239220/158142421-68aabebc-d704-469c-bc76-6d3bd6f93bf3.png">
+
+<회원 / 주문 객체 다이어그램> - 서버가 뜰 때 결정되는. 클라이언트가 실제 사용하는 것들을 표시
+
+<img width="596" alt="스크린샷 2022-03-14 오후 5 34 18" src="https://user-images.githubusercontent.com/77239220/158134501-c2633c88-736e-4b4f-985d-1dcd3a246543.png">
+<img width="594" alt="스크린샷 2022-03-14 오후 6 20 47" src="https://user-images.githubusercontent.com/77239220/158142445-84ba4eaa-9a36-4d27-ada6-dfb99e1385fc.png">
+
+## ❓ 현재 코드의 문제점
+
+```java
+public class MemberServiceImpl implements MemberService {
+
+   private final MemberRepository memberRepository = new MemoryMemberRepository();
+}
+```
+
+현재 코드는 추상화에도 의존하고 구체화에도 의존하기 때문에 DIP를 위반한다. 
