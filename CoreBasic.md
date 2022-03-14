@@ -1,7 +1,7 @@
 # Spring Core Basic
 
 - 🌸 [섹션 1. 객체 지향 설계와 스프링](#섹션-1.-객체-지향-설계와-스프링)
-- 🧩 [섹션 2. 스프링 핵심 원리 이해1 - 예제 만들기](#섹션-2.-스프링-핵심-원리-이해1---예제-만들기)
+- 🧩 [섹션 2. 스프링 핵심 원리 이해1 - 예제 만들기](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-2-%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EC%9D%B4%ED%95%B41---%EC%98%88%EC%A0%9C-%EB%A7%8C%EB%93%A4%EA%B8%B0)
 
 ---
 
