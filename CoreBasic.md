@@ -3,6 +3,7 @@
 - 🌸 [섹션 1. 객체 지향 설계와 스프링](#섹션-1.-객체-지향-설계와-스프링)
 - 🧩 [섹션 2. 스프링 핵심 원리 이해1 - 예제 만들기](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-2-%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EC%9D%B4%ED%95%B41---%EC%98%88%EC%A0%9C-%EB%A7%8C%EB%93%A4%EA%B8%B0)
 - 💫 [섹션 3. 스프링 핵심 원리 이해2 - 객체 지향 원리 적용](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-3-%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EC%9D%B4%ED%95%B42---%EA%B0%9D%EC%B2%B4-%EC%A7%80%ED%96%A5-%EC%9B%90%EB%A6%AC-%EC%A0%81%EC%9A%A9)
+- 🦄 [섹션 4. 스프링 컨테이너와 스프링 빈](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-4.-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88%EC%99%80-%EC%8A%A4%ED%94%84%EB%A7%81-%EB%B9%88)
 
 ---
 
@@ -267,3 +268,71 @@ public class AppConfig {
      컨테이너(ApplicationContext)를 통해서 필요한 스프링 빈(객체)를 찾아야 함!
      
      -> **applicationContext.getBean()** 메서드를 사용해 스프링 빈을 찾을 수 있음
+
+---
+
+## 섹션 4. 스프링 컨테이너와 스프링 빈
+## 🤖 스프링 컨테이너 생성
+
+ApplicationContext 는 스프링 컨테이너(인터페이스) 이다. AnnotationConfigAoolicationContext 가 구현체.
+
+> 스프링 컨테이너 생성 과정
+
+1. 스프링 컨테이너 생성
+
+<img width="776" alt="스크린샷 2022-03-31 오전 2 37 30" src="https://user-images.githubusercontent.com/77239220/160897155-ea414ca8-787a-4314-84b4-a035e319a790.png">
+
+2. 스프링 빈 등록
+
+<img width="779" alt="스크린샷 2022-03-31 오전 2 38 19" src="https://user-images.githubusercontent.com/77239220/160897394-23ec0eb8-adf4-4097-9e98-dde5c50c6c11.png">
+
+스프링 빈 이름은 중복되면 안됨
+
+3. 스프링 빈 의존관계 설정
+
+<img width="780" alt="스크린샷 2022-03-31 오전 2 40 04" src="https://user-images.githubusercontent.com/77239220/160901902-78bbc5f1-a14f-4184-b94d-2ee301a9cee3.png">
+
+스프링 컨테이너는 설정 정보를 참고해서 의존관계를 주입함 (= DI). 
+
+원래 스프링은 1. 빈을 생성 2. 의존관계 주입 하는 단계가 나누어져 있다. 하지만 자바 코드로 스프링 빈을 등록하면 생성자를 호출하면서 의존관계 주입도 한번에 처리된다!
+
+## 🍎 스프링 빈 조회
+
+- ac.getBean(빈이름, 타입) -- 기본적으로 빈이름은 생략 가능
+- 타입으로 조회시 같은 타입의 스프링 빈이 둘 이상이면 오류가 발생하기 때문에 이때는 빈 이름을 지정해주면 됨. 
+- ac.getBeansOfType() 으로 해당 타입의 모든 빈을 조회 가능
+
+<스프링 빈 상속관계>
+
+- 부모 타입으로 조회하면 자식 타입도 함께 조회된다 -> Object 타입으로 조회 시 모든 스프링 빈 조회됨
+
+## 🏭 BeanFactory & ApplicationContext
+
+<img width="781" alt="스크린샷 2022-04-01 오후 1 26 11" src="https://user-images.githubusercontent.com/77239220/161194857-9434a4ee-e147-43ae-ae97-78e8b694c1d2.png">
+
+1. BeanFactory
+   
+   : 스프링 컨테이너의 최상위 인터페이스로, 빈을 관리/조회한다.
+
+2. ApplicationContext
+
+   : BeanFactory 기능을 모두 상속받아서 제공 + 부가 기능
+
+   - MessageSource (국제화 - 한국에서 들어오면 한국어로)
+   - EnvironmentCapable (로컬, 개발, 운영 등을 구분해서 처리)
+   - ApplicationEventPublisher (이벤트를 발행하고 구독하는 모델을 편리하게 지원)
+   - ResourceLoader (파일, 클래스패스, 외부 등에서 리소스를 편리하게 조회)
+
+이 둘을 모두 스프링 컨테이너라고 하고, 보통 ApplicationContext를 사용한다.
+
+## 🌻 스프링 빈 설정 메타 정보 - BeanDefinition
+
+<스프링은 어떻게 다양한 설정 형식을 지원하는 걸까?>
+
+-> **역할과 구현을 개념적으로 나눴기 때문**
+
+스프링 컨테이너는 자바 코드인지 XML인지 몰라도 되고 오직 **BeanDefinition이라는 인터페이스(추상화)** 에만 의존한다. 
+
+이 BeanDefinition을 빈 설정 메타 정보라고 하며 `@Bean`, `<bean>` 당 각각 하나씩 메타 정보가 생성된다. 스프링 컨테이너는 이 메타정보를 기반으로 스프링 빈을 생성한다.
+
+- AnnotationConfigApplicationContext 는 AnnotatedBeanDefinitionReader 를 사용해 AppConfig.class 를 읽고 BeanDefinition 을 생성한다.
