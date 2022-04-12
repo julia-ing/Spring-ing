@@ -5,6 +5,7 @@
 - 💫 [섹션 3. 스프링 핵심 원리 이해2 - 객체 지향 원리 적용](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-3-%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EC%9D%B4%ED%95%B42---%EA%B0%9D%EC%B2%B4-%EC%A7%80%ED%96%A5-%EC%9B%90%EB%A6%AC-%EC%A0%81%EC%9A%A9)
 - 🦄 [섹션 4. 스프링 컨테이너와 스프링 빈](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-4-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88%EC%99%80-%EC%8A%A4%ED%94%84%EB%A7%81-%EB%B9%88)
 - 🏖 [섹션 5. 싱글톤 컨테이너](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-5-%EC%8B%B1%EA%B8%80%ED%86%A4-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88)
+- 🦕 [섹션 6. 컴포넌트 스캔](https://github.com/julia-ing/Spring-ing/blob/main/CoreBasic.md#%EC%84%B9%EC%85%98-6-%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%EC%8A%A4%EC%BA%94)
 ---
 
 ## 섹션 1. 객체 지향 설계와 스프링
@@ -537,3 +538,124 @@ bean = class hello.core.AppConfig
 테스트 코드에서 memberRepository가 3번 호출되면서 싱글톤이 깨진 것을 볼 수 있다.
 
 따라서 스프링 설정 정보는 항상 @Configuration 을 사용해 싱글톤을 보장하자.
+
+---
+## 섹션 6. 컴포넌트 스캔
+## 🐯 컴포넌트 스캔과 의존관계 자동 주입 시작하기
+
+등록해야 할 스프링 빈이 엄청 많아지면 설정 정보도 커지고 귀찮아짐..
+
+반복을 없애기 위해, 스프링은 자동으로 스프링 빈을 등록하는 컴포넌트 스캔 기능과 의존관계 자동 주입하는 @Autowired 기능 제공
+
+```java
+@Configuration
+@ComponentScan(
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Configuration.class)
+)
+public class AutoAppConfig {
+}
+```
+- 스프링 빈의 기본 이름은 클래스명을 사용하되 맨 앞글자는 소문자로 된다. (ex: MemberServiceImpl 클래스 -> memberServiceImpl)
+  / 직접 이름 지정도 가능 : @Component("memberService2")
+
+
+전에는 AppConfig에서 `return new MemberServiceImpl(memberRepository());` 와 같이 명시적으로 주입을 했다면,
+이제는
+Bean 수동 등록이 아니라 ComponentScan을 쓰기 때문에 자동주입(@Autowired) 필요!
+
+```java
+@Component
+public class MemberServiceImpl implements MemberService {
+
+    private MemberRepository memberRepository;
+
+    @Autowired  // Bean 수동 등록이 아니라 ComponentScan을 쓰면 자동주입 필요
+    public MemberServiceImpl(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
+}
+```
+
+<img width="888" alt="스크린샷 2022-04-08 오전 2 50 42" src="https://user-images.githubusercontent.com/77239220/162265781-4fb1b894-75bc-4219-b33e-fb4de155c8e9.png">
+
+- Autowired 에서 기본적으로 스프링 빈을 조회하는 전략은, **타입이 같은 빈**을 찾아서 주입하는 것!
+
+## 🌿 탐색 위치와 기본 스캔 대상
+
+```java
+@ComponentScan(
+        basePackages = "hello.core" // core와 core 하위 패키지들만 컴포넌트 스캔의 대싱이 됨
+}
+```
+
+basePackages 를 따로 지정하지 않으면 @ComponentScan 이 붙은 설정 정보 클래스의 패키지가 시작 위치가 된다.
+
+보통 basePackages 지정하지 않고, 설정 정보 클래스의 위치를 프로젝트 최상단에 두는 방법을 사용한다.
++ 참고로 스프링 부트를 사용하면 @SpringBootApplication 를 관례적으로 프로젝트 시작 루트 위치에 두는데 이 설정 안에 @ComponentScan 이 들어있다. 
+따라서 스프링 부트를 쓰면 @ComponentScan 안 적어도 되긴 함..
+
+<컴포넌트 스캔 기본 대상>
+: @Component, @Controller, @Service, @Repository, @Configuration
+
+<부가 기능>
+
+- @Controller : 스프링 MVC 컨트롤러로 인식
+- @Repository : 스프링 데이터 접근 계층으로 인식하고, 데이터 계층의 예외를 스프링 예외로 변환
+- @Configuration : 스프링 설정 정보로 인식하고, 스프링 빈이 싱글톤을 유지하도록 추가 처리
+- @Service : 특별한 처리는 없지만 @Service로 개발자들이 비즈니스 계층을 쉽게 인식
+
+## 🍖 필터
+
+```java
+@ComponentScan(
+      includeFilters = {
+            @Filter(type = FilterType.ANNOTATION, classes =
+    MyIncludeComponent.class),
+      },
+      excludeFilters = {
+            @Filter(type = FilterType.ANNOTATION, classes =
+    MyExcludeComponent.class),
+            @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = BeanA.class)
+      }
+)
+```
+
+- includeFilters - 컴포넌트 스캔 대상 추가 / 
+excludeFilters - 컴포넌트 스캔에서 제외
+
+- FilterType의 5가지 옵션
+  
+    1. ANNOTATION: 기본값, 애노테이션을 인식해 동작
+
+       ex) org.example.SomeAnnotation 
+  
+    2. ASSIGNABLE_TYPE: 지정한 타입과 자식 타입을 인식해 동작
+
+       ex) org.example.SomeClass 
+  
+    3. ASPECTJ: AspectJ 패턴 사용 
+
+       ex) org.example..*Service+ 
+  
+    4. REGEX: 정규 표현식 
+       
+       ex) org\.example\.Default.*
+  
+    5. CUSTOM: TypeFilter 이라는 인터페이스를 구현해서 처리 
+
+       ex) org.example.MyTypeFilter
+
+- @Component 면 충분하기 때문에 includeFilters/excludeFilters 사용할 일은 거의 없음.
+
+  - 최근 스프링 부트는 컴포넌트 스캔을 기본으로 제공하는데, 스프링의 기본 설정에 최대한 맞추어 사용하는 것을 권장
+
+## 🚙 중복 등록과 충돌
+
+컴포넌트 스캔에서 같은 빈 이름을 등록하면 어떻게 될까?
+
+1. 자동 빈 등록 vs 자동 빈 등록
+    - 컴포넌트 스캔에 의해 자동으로 스프링 빈이 등록되는데, 그 이름이 같은 경우 스프링은 ConflictingBeanDefinitionException 예외를 발생시킴
+2. 수동 빈 등록 vs 자동 빈 등록
+
+    - 수동 빈 등록이 우선권을 가짐 (수동 빈이 자동 빈을 오버라이딩 해버린다.)
+    - 최근 스프링 부트에서는 이 경우 기본적으로 오류 발생시킴
